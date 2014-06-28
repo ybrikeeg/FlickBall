@@ -11,7 +11,7 @@
 
 @implementation AttributorMyScene
 
-#define MAX_TAN_DIST 50
+#define MAX_TAN_DIST 70
 
 -(id)initWithSize:(CGSize)size {
    if (self = [super initWithSize:size]) {
@@ -36,22 +36,31 @@
    return self;
 }
 
+/**
+ * This function returns the distnce between two points
+ */
 -(float)distance:(CGPoint)p1 and:(CGPoint)p2{
    return sqrtf((pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2)));
 }
 
+/**
+ * This function returns the slope of two points
+ */
 -(float)slope:(CGPoint)p1 and:(CGPoint)p2{
    return (float)((p1.y - p2.y) / (p1.x - p2.x));
 }
 
+/**
+ * This function returns a point that is a fixed distance from
+ * an anchor point that lies on the line formed by anchor and point.
+ * Inside determines if it is inbetween the two points or and
+ * extrapolation of it
+ */
 -(CGPoint)anchor:(CGPoint)anchor point:(CGPoint)other slope:(float)slope withDistance:(int)dist inside:(BOOL) inside{
    float dx = 0, dy = 0;
-   NSLog(@"Slopeszzz: %f", slope);
    if (slope == 0) {
-      NSLog(@"Slope is zero");
       dx = dist;
    }else if (slope == slope + 1){
-      NSLog(@"Slope is inf");
       dy = dist;
    }else{
       dx = sqrtf((powf(dist, 2) / (1 + (powf(slope, 2)))));
@@ -71,11 +80,17 @@
    return tangent_point;
 }
 
+/**
+ * This function returns the angle between two points
+ */
 -(float)calculate_angle:(CGPoint)tangent center:(CGPoint)center{
    float theta = atan2f(tangent.y - center.y, tangent.x - center.x);
    return (theta < 0)? theta + 2*M_PI : theta;
 }
 
+/**
+ * This function returns the center point of the two tangent points
+ */
 -(CGPoint)create_center_with_tan:(CGPoint)t1 tan2:(CGPoint)t2 slope1:(float)slope1 slope2:(float)slope2{
    CGPoint center;
    
@@ -96,32 +111,34 @@
    }
    return center;
 }
+
+/**
+ * This function returns uses all the points to calculate the
+ * players running path
+ */
 -(void)create_path:(NSMutableArray *)point_array1{
+   for (int i = 0; i < [point_array1 count]-1; i ++){
+      CGPoint p1 = [[point_array1 objectAtIndex:i] CGPointValue];
+      CGPoint p2 = [[point_array1 objectAtIndex:i+1] CGPointValue];
+      
+      SKShapeNode *line_to_t1 = [SKShapeNode node];
+      
+      CGMutablePathRef t1_path = CGPathCreateMutable();
+      CGPathMoveToPoint(t1_path, NULL, p1.x, p1.y);
+      CGPathAddLineToPoint(t1_path, NULL, p2.x, p2.y);
+      
+      line_to_t1.lineWidth = 10.0f;
+      line_to_t1.path = t1_path;
+      
+      [line_to_t1 setStrokeColor:[UIColor blueColor]];
+      
+      [self addChild:line_to_t1];
+   }
    
-   /*
-    for (int i = 0; i < [point_array count]-1; i ++){
-    CGPoint p1 = [[point_array objectAtIndex:i] CGPointValue];
-    CGPoint p2 = [[point_array objectAtIndex:i+1] CGPointValue];
-    
-    SKShapeNode *line_to_t1 = [SKShapeNode node];
-    
-    CGMutablePathRef t1_path = CGPathCreateMutable();
-    CGPathMoveToPoint(t1_path, NULL, p1.x, p1.y);
-    CGPathAddLineToPoint(t1_path, NULL, p2.x, p2.y);
-    
-    line_to_t1.lineWidth = 10.0f;
-    line_to_t1.path = t1_path;
-    
-    [line_to_t1 setStrokeColor:[UIColor blueColor]];
-    
-    [self addChild:line_to_t1];
-    }
-    */
    NSMutableArray *arr = [NSMutableArray arrayWithArray:point_array1];
    CGMutablePathRef player_path = CGPathCreateMutable();
    
    for (int i = 1; i < [arr count]-1; i ++){
-      NSLog(@"Print points: %@", NSStringFromCGPoint([[arr objectAtIndex:i] CGPointValue]));
       
       CGPoint p1 = [[arr objectAtIndex:i-1] CGPointValue];
       CGPoint p2 = [[arr objectAtIndex:i] CGPointValue];
@@ -131,53 +148,23 @@
       float a = [self distance: p1 and: p2];
       float b = [self distance: p2 and: p3];
       float c = [self distance: p1 and: p3];
-      NSLog(@"Distances: %f, %f, %f", a, b, c);
       
       //theta is the angle of p2 when p1, p2, p3 form a triangle (law of cosines)
       float theta = acosf((powf(a, 2) + powf(b, 2) - pow(c, 2)) / (2*a*b));
-      NSLog(@"Theta: %f", theta);
       
-      int tan_dist = theta/M_PI * MAX_TAN_DIST;
-      tan_dist = 45;
+      //distance the tangents are from the anchor point (variable based on theta)
+      int tan_dist = theta/M_PI * MAX_TAN_DIST +  30;
+      
       //get the slopes of the line segments
       float slope1 = [self slope: p1 and: p2];
       float slope2 = [self slope: p2 and: p3];
-      NSLog(@"Slopes: %f, %f", slope1, slope2);
       
+      //calculate both tangent points
       CGPoint t1 = [self anchor: p2 point: p1 slope: slope1 withDistance: tan_dist inside: YES];
       CGPoint t2 = [self anchor: p2 point: p3 slope: slope2 withDistance: tan_dist inside: YES];
-      NSLog(@"Tangent points: %@, %@", NSStringFromCGPoint(t1), NSStringFromCGPoint(t2));
       
+      //center point of the two tangent points
       CGPoint center = [self create_center_with_tan: t1 tan2: t2 slope1: slope1 slope2: slope2];
-      
-      
-      /*
-       
-       //draw line to center point of circle for testing
-       SKShapeNode *line_to_center = [SKShapeNode node];
-       
-       CGMutablePathRef center_path = CGPathCreateMutable();
-       CGPathMoveToPoint(center_path, NULL, t1.x, t1.y);
-       CGPathAddLineToPoint(center_path, NULL, center.x, center.y);
-       
-       line_to_center.path = center_path;
-       [line_to_center setStrokeColor:[UIColor greenColor]];
-       
-       [self addChild:line_to_center];
-       
-       
-       //draw line to center point of circle for testing
-       SKShapeNode *line_to_center2 = [SKShapeNode node];
-       
-       CGMutablePathRef center_path2 = CGPathCreateMutable();
-       CGPathMoveToPoint(center_path2, NULL, t2.x, t2.y);
-       CGPathAddLineToPoint(center_path2, NULL, center.x, center.y);
-       
-       line_to_center2.path = center_path2;
-       [line_to_center2 setStrokeColor:[UIColor purpleColor]];
-       
-       [self addChild:line_to_center2];
-       */
       
       float radius = [self distance:t1 and:center];
       //for testing
@@ -186,29 +173,23 @@
       if (radius != rad2){
          
       }
-      NSLog(@"Distances: %f, %f", radius, rad2);
       
+      //angles from each point, needed to calculate delta for arc function
       float start_angle = [self calculate_angle: t1 center: center];
       float end_angle = [self calculate_angle: t2 center: center];
       
       
-      NSLog(@"Start angles: %f, %f", start_angle, end_angle);
       float delta = start_angle - end_angle;
+      
+      //adjusts for invalid delta values
       if (delta > M_PI){
-         NSLog(@"Adjusting2");
          delta -= 2*M_PI;
       }
-      
       if (delta < -M_PI){
-         NSLog(@"Adjusting2");
          delta += 2*M_PI;
       }
-      NSLog(@"Delta: %f", delta);
       
-      //create the line from p1 to t1
-      //SKShapeNode *line_to_t1 = [SKShapeNode node];
-      
-      //CGMutablePathRef t1_path = CGPathCreateMutable();
+      //if the first iteration, the path must be move to point, not add line to point
       if (i == 1){
          CGPathMoveToPoint(player_path, NULL, p1.x, p1.y);
          
@@ -216,28 +197,12 @@
          CGPathAddLineToPoint(player_path, NULL, p1.x, p1.y);
          
       }
+      
+      //add line from start to the first tangent
       CGPathAddLineToPoint(player_path, NULL, t1.x, t1.y);
+      //add arc
       CGPathAddRelativeArc(player_path, NULL, center.x, center.y, radius, start_angle, -delta);
-      //line_to_t1.path = player_path;
-      //[line_to_t1 setStrokeColor:[UIColor whiteColor]];
       
-      //[self addChild:line_to_t1];
-      
-      
-      
-      /*
-       //create the line from t2 to p3
-       SKShapeNode *line_to_t2 = [SKShapeNode node];
-       
-       CGMutablePathRef t2_path = CGPathCreateMutable();
-       CGPathMoveToPoint(player_path, NULL, t2.x, t2.y);
-       CGPathAddLineToPoint(player_path, NULL, p3.x, p3.y);
-       
-       line_to_t2.path = player_path;
-       [line_to_t2 setStrokeColor:[UIColor whiteColor]];
-       
-       [self addChild:line_to_t2];
-       */
       //replace p2 with t1
       [arr replaceObjectAtIndex:i withObject:[NSValue valueWithCGPoint:t2]];
    }
