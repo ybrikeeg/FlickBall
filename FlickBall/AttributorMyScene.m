@@ -13,11 +13,6 @@
 
 #define MAX_TAN_DIST 50
 
-//commenasdfasd
-//second
-//lets code xcode
-//another one more
-
 -(id)initWithSize:(CGSize)size {
    if (self = [super initWithSize:size]) {
       /* Setup your scene here */
