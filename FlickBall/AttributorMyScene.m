@@ -26,11 +26,18 @@
       
       [self create_path: _point_array];
       
+      /*
       _player = [SKSpriteNode spriteNodeWithImageNamed:@"player"];
       _player.position = [[_point_array objectAtIndex:0] CGPointValue];
       _player.name = @"player";//how the node is identified later
       _player.zPosition = 1.0;
       [self addChild:_player];
+      */
+      
+      _player1 = [[Player alloc] initWithImageNamed:@"player"];
+      _player1.position = [[_point_array objectAtIndex:0] CGPointValue];
+      _player1.zPosition = 1.0;
+      [self addChild:_player1];
       
    }
    return self;
@@ -218,16 +225,15 @@
    
    [self addChild:line_to_t1];
    
-   NSLog(@"%@", _point_array);
+   //NSLog(@"%@", _point_array);
    
    SKAction *run_route = [SKAction followPath:player_path asOffset:NO orientToPath:NO duration:2.0f];
-   [_player runAction:run_route];
+   [_player1 runAction:run_route];
    
 }
 
 -(void)update:(CFTimeInterval)currentTime {
-   /* Called before each frame is rendered */
-   
+   /* Called before each frame is rendered */   
 }
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
    [self removeAllChildren];
@@ -237,11 +243,11 @@
    [_point_array addObject:[NSValue valueWithCGPoint:touchPoint]];
    
    if ([_point_array count] >= 3){
-      _player.position = [[_point_array objectAtIndex:0] CGPointValue];
-      [self addChild:_player];
+      _player1.position = [[_point_array objectAtIndex:0] CGPointValue];
+      [self addChild:_player1];
       [self create_path:_point_array];
    }
-   NSLog(@"New Point %f %f", touchPoint.x, touchPoint.y);
+   //NSLog(@"New Point %f %f", touchPoint.x, touchPoint.y);
 }
 -(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event{
    [self removeAllChildren];
