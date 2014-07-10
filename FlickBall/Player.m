@@ -8,6 +8,9 @@
 
 #import "Player.h"
 
+@interface Player ()
+@property(nonatomic, retain) SKShapeNode *veloLine;
+@end
 @implementation Player
 
 - (instancetype) initWithImageNamed:(NSString *)fileName {
@@ -17,14 +20,18 @@
       SKSpriteNode *p = [SKSpriteNode spriteNodeWithImageNamed:fileName];
       [self addChild:p];
       
-      [NSTimer scheduledTimerWithTimeInterval:1.0/60.0f target:self selector:@selector(update:) userInfo:nil repeats:YES];
+      self.lastPosition = self.position;
+      
+      self.veloLine = [SKShapeNode node];
+      [self addChild:self.veloLine];
+      
+      [NSTimer scheduledTimerWithTimeInterval:1.0/35.0f target:self selector:@selector(update:) userInfo:nil repeats:YES];
    }
    return self;
 }
 
 -(void)update:(CFTimeInterval)currentTime {
-   /* Called before each frame is rendered */
-   NSLog(@"running: %@", NSStringFromCGPoint(self.position));
+   self.lastPosition = self.position;
 }
 
 @end

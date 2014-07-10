@@ -10,4 +10,7 @@
 
 @interface Player : SKSpriteNode
 
+@property (nonatomic) CGPoint lastPosition;
+@property (nonatomic) CGPoint startPosition;
+
 @end

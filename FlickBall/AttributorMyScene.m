@@ -27,17 +27,33 @@
       [self create_path: _point_array];
       
       /*
-      _player = [SKSpriteNode spriteNodeWithImageNamed:@"player"];
-      _player.position = [[_point_array objectAtIndex:0] CGPointValue];
-      _player.name = @"player";//how the node is identified later
-      _player.zPosition = 1.0;
-      [self addChild:_player];
-      */
+       _player = [SKSpriteNode spriteNodeWithImageNamed:@"player"];
+       _player.position = [[_point_array objectAtIndex:0] CGPointValue];
+       _player.name = @"player";//how the node is identified later
+       _player.zPosition = 1.0;
+       [self addChild:_player];
+       */
       
       _player1 = [[Player alloc] initWithImageNamed:@"player"];
       _player1.position = [[_point_array objectAtIndex:0] CGPointValue];
       _player1.zPosition = 1.0;
       [self addChild:_player1];
+      
+      
+      self.veloLine = [SKShapeNode node];
+      [self.veloLine setStrokeColor:[UIColor redColor]];
+      [self addChild:self.veloLine];
+      
+      
+      [self create_path:_point_array];
+      
+      
+      self.returnButton = [SKSpriteNode spriteNodeWithImageNamed:@"player"];
+      self.returnButton.position = CGPointMake(300,460);
+      self.returnButton.name = @"returnButton";//how the node is identified later
+      self.returnButton.zPosition = 1.0;
+      [self addChild: self.returnButton];
+      
       
    }
    return self;
@@ -227,30 +243,79 @@
    
    //NSLog(@"%@", _point_array);
    
-   SKAction *run_route = [SKAction followPath:player_path asOffset:NO orientToPath:NO duration:2.0f];
+   SKAction *run_route = [SKAction followPath:player_path asOffset:NO orientToPath:NO duration:6.0f];
    [_player1 runAction:run_route];
    
 }
 
--(void)update:(CFTimeInterval)currentTime {
-   /* Called before each frame is rendered */   
+- (UIBezierPath *)returnToStart{
+   float slope = [self slope:self.player1.position and:self.player1.lastPosition];
+   CGPoint veloPoint = [self anchor:self.player1.position point:self.player1.lastPosition slope:slope withDistance:140 inside:NO];
+   UIBezierPath *bezPath = [UIBezierPath bezierPath];
+   [bezPath moveToPoint:self.player1.position];
+   //[bezPath addQuadCurveToPoint:CGPointMake(20, 20) controlPoint:veloPoint];
+   CGPoint p2 = CGPointMake(veloPoint.x, veloPoint.y + 1);
+   [bezPath addCurveToPoint:CGPointMake(20, 20) controlPoint1:veloPoint controlPoint2:p2];
+   NSLog(@"Control Point: %@", NSStringFromCGPoint(veloPoint));
+   return bezPath;
 }
-- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-   [self removeAllChildren];
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event{
    UITouch *touch = [touches anyObject];
-   CGPoint touchPoint = [touch locationInView:self.view];
-   touchPoint.y = self.view.frame.size.height - touchPoint.y;
-   [_point_array addObject:[NSValue valueWithCGPoint:touchPoint]];
+   CGPoint location = [touch locationInNode:self];
+   SKNode *node = [self nodeAtPoint:location];
    
-   if ([_point_array count] >= 3){
-      _player1.position = [[_point_array objectAtIndex:0] CGPointValue];
-      [self addChild:_player1];
-      [self create_path:_point_array];
+   if ([node.name isEqualToString:@"returnButton"]) {
+      NSLog(@"returning");
+      UIBezierPath *returnPath = [self returnToStart];
+      [self.player1 removeAllActions];
+      SKAction *run_route = [SKAction followPath:returnPath.CGPath asOffset:NO orientToPath:NO duration:2.0f];
+      [self.player1 runAction:run_route];
+      self.veloLine.path = returnPath.CGPath;
+   }else{
+      if (![self.player1 hasActions]){
+         [self removeAllChildren];
+         
+         CGPoint touchPoint = [touch locationInView:self.view];
+         touchPoint.y = self.view.frame.size.height - touchPoint.y;
+         [_point_array addObject:[NSValue valueWithCGPoint:touchPoint]];
+         
+         if ([_point_array count] >= 3){
+            _player1.position = [[_point_array objectAtIndex:0] CGPointValue];
+            [self addChild:_player1];
+            [self addChild:self.returnButton];
+            [self addChild:self.veloLine];
+            [self create_path:_point_array];
+         }
+      }
    }
-   //NSLog(@"New Point %f %f", touchPoint.x, touchPoint.y);
 }
--(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event{
-   [self removeAllChildren];
-   [_point_array removeAllObjects];
-}
+/*
+ - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+ 
+ UITouch *touch = [touches anyObject];
+ CGPoint location = [touch locationInNode:self];
+ 
+ SKNode *node = [self nodeAtPoint:location];
+ if (![node.name isEqualToString:@"returnButton"]) {
+ [self removeAllChildren];
+ 
+ CGPoint touchPoint = [touch locationInView:self.view];
+ touchPoint.y = self.view.frame.size.height - touchPoint.y;
+ [_point_array addObject:[NSValue valueWithCGPoint:touchPoint]];
+ 
+ if ([_point_array count] >= 3){
+ _player1.position = [[_point_array objectAtIndex:0] CGPointValue];
+ [self addChild:_player1];
+ [self addChild:self.veloLine];
+ [self create_path:_point_array];
+ }
+ }
+ }
+ */
+/*
+ -(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event{
+ [self removeAllChildren];
+ [_point_array removeAllObjects];
+ }
+ */
 @end

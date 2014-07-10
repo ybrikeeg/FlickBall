@@ -11,8 +11,9 @@
 
 @interface AttributorMyScene : SKScene
 
-
 @property (nonatomic,retain) NSMutableArray *point_array; // ADDED ON EDI
-//@property (nonatomic, retain) SKSpriteNode *player;
 @property (nonatomic, retain) Player *player1;
+@property(nonatomic, retain) SKShapeNode *veloLine;
+@property (nonatomic, retain) SKSpriteNode *returnButton;
+
 @end
