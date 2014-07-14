@@ -16,4 +16,6 @@
 @property(nonatomic, retain) SKShapeNode *veloLine;
 @property (nonatomic, retain) SKSpriteNode *returnButton;
 
+
+@property (nonatomic) CGPoint startPoint;
 @end

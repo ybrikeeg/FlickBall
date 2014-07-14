@@ -55,6 +55,10 @@
       [self addChild: self.returnButton];
       
       
+      _startPoint = CGPointMake(20, 20);
+      [NSTimer scheduledTimerWithTimeInterval:1.0/35.0f target:self selector:@selector(update:) userInfo:nil repeats:YES];
+      
+      
    }
    return self;
 }
@@ -83,7 +87,7 @@
    float dx = 0, dy = 0;
    if (slope == 0) {
       dx = dist;
-   }else if (slope == slope + 1){
+   }else if (slope == slope + 1){//slope is infinite (vertical line)
       dy = dist;
    }else{
       dx = sqrtf((powf(dist, 2) / (1 + (powf(slope, 2)))));
@@ -247,16 +251,64 @@
    [_player1 runAction:run_route];
    
 }
-
-- (UIBezierPath *)returnToStart{
+- (void)update:(NSTimeInterval)currentTime{
+   self.veloLine.path = [self returnToStart].CGPath;
+   
+}
+- (CGPoint)calculateAnchorPoint2:(CGPoint)currentPosition controlPoint1:(CGPoint)controlPoint1
+{
+   CGPoint returnPoint;
+   float slope = [self slope:currentPosition and:controlPoint1];
+   int dirY = (currentPosition.y > controlPoint1.y) ? 1 : -1;//1 means moving down to top, -1 means top to down
+   int dirX = (currentPosition.x > controlPoint1.x) ? 1 : -1;//1 means moving left to right, -1 means right to left
+   
+   if (slope == slope + 1){
+      if (dirY == 1){
+         return CGPointMake(self.startPoint.x, controlPoint1.y);
+      } else if (dirY == -1){
+         return CGPointMake(controlPoint1.x, self.startPoint.y);
+      }
+      NSLog(@"SHOULD NEVER BE CALLED");
+   }
+   
+   if (slope > 0){
+      if (dirY == 1){
+         return CGPointMake(controlPoint1.x, self.startPoint.y);//works
+      } else if (dirY == -1){
+         return CGPointMake(self.startPoint.x, controlPoint1.y);
+      }
+      NSLog(@"SHOULD NEVER BE CALLED");
+   } else if (slope < 0){
+      if (dirY == 1){
+         return CGPointMake(self.startPoint.x, controlPoint1.y);
+      } else if (dirY == -1){
+         return CGPointMake(controlPoint1.x, self.startPoint.y);
+      }
+      NSLog(@"SHOULD NEVER BE CALLED");
+   } else if (slope == 0){
+      if (dirX == 1){
+         return CGPointMake(controlPoint1.x, self.startPoint.y);
+      } else if (dirY == -1){
+         return CGPointMake(self.startPoint.x, controlPoint1.y);
+      }
+      NSLog(@"SHOULD NEVER BE CALLED");
+   }
+   
+   NSLog(@"SHOULD NEVER BE CALLED: %f \t %@ -- %@", slope, NSStringFromCGPoint(currentPosition), NSStringFromCGPoint(controlPoint1));
+   return returnPoint;//this should never be called
+}
+- (UIBezierPath *)returnToStart
+{
    float slope = [self slope:self.player1.position and:self.player1.lastPosition];
    CGPoint veloPoint = [self anchor:self.player1.position point:self.player1.lastPosition slope:slope withDistance:140 inside:NO];
+
    UIBezierPath *bezPath = [UIBezierPath bezierPath];
    [bezPath moveToPoint:self.player1.position];
    //[bezPath addQuadCurveToPoint:CGPointMake(20, 20) controlPoint:veloPoint];
-   CGPoint p2 = CGPointMake(veloPoint.x, veloPoint.y + 1);
+   CGPoint p2 = [self calculateAnchorPoint2: self.player1.position controlPoint1: veloPoint];
    [bezPath addCurveToPoint:CGPointMake(20, 20) controlPoint1:veloPoint controlPoint2:p2];
-   NSLog(@"Control Point: %@", NSStringFromCGPoint(veloPoint));
+   //NSLog(@"Control Point: %@", NSStringFromCGPoint(veloPoint));
+   self.veloLine.path = bezPath.CGPath;
    return bezPath;
 }
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event{
@@ -270,7 +322,6 @@
       [self.player1 removeAllActions];
       SKAction *run_route = [SKAction followPath:returnPath.CGPath asOffset:NO orientToPath:NO duration:2.0f];
       [self.player1 runAction:run_route];
-      self.veloLine.path = returnPath.CGPath;
    }else{
       if (![self.player1 hasActions]){
          [self removeAllChildren];
