@@ -9,30 +9,25 @@
 #import "AttributorMyScene.h"
 #import <math.h>
 
+@interface AttributorMyScene ()
+@property (nonatomic) SKShapeNode *veloVector;
+@end
 @implementation AttributorMyScene
 
 #define MAX_TAN_DIST 70
 
 -(id)initWithSize:(CGSize)size {
    if (self = [super initWithSize:size]) {
-      /* Setup your scene here */
       
       self.backgroundColor = [SKColor colorWithRed:0.15 green:0.15 blue:0.3 alpha:1.0];
       
       _point_array = [[NSMutableArray alloc] init];
-      [_point_array addObjectsFromArray:@[[NSValue valueWithCGPoint: CGPointMake(20, 40)],
+      [_point_array addObjectsFromArray:@[[NSValue valueWithCGPoint: CGPointMake(20, 20)],
                                           [NSValue valueWithCGPoint: CGPointMake(20, 200)],
                                           [NSValue valueWithCGPoint: CGPointMake(300, 200)]]];
       
       [self create_path: _point_array];
       
-      /*
-       _player = [SKSpriteNode spriteNodeWithImageNamed:@"player"];
-       _player.position = [[_point_array objectAtIndex:0] CGPointValue];
-       _player.name = @"player";//how the node is identified later
-       _player.zPosition = 1.0;
-       [self addChild:_player];
-       */
       
       self.player1 = [[Player alloc] initWithImageNamed:@"player"];
       self.player1.position = [[_point_array objectAtIndex:0] CGPointValue];
@@ -45,6 +40,10 @@
       self.veloLine.zPosition = 50.0f;
       [self addChild:self.veloLine];
       
+      self.veloVector = [SKShapeNode node];
+      [self.veloVector setStrokeColor:[UIColor orangeColor]];
+      self.veloVector.zPosition = 50.0f;
+      [self addChild:self.veloVector];
       
       [self create_path:_point_array];
       
@@ -251,8 +250,51 @@
    [self addChild:line_to_t1];
    
    
-   SKAction *run_route = [SKAction followPath:player_path asOffset:NO orientToPath:NO duration:6.0f];
+   SKAction *run_route = [SKAction followPath:player_path asOffset:NO orientToPath:NO duration:3.0f];
    [self.player1 runAction:run_route];
+   
+}
+
+- (CGPoint)createControlPointUsingVeloPoint:(CGPoint)velo playerPosition:(CGPoint)playerPosition slope:(float)slope
+{
+   
+   if (slope == slope + 1 || slope != slope){//slope is infinite (vertical line)
+      return playerPosition;
+   } else if (slope > 0){
+      if (velo.y > playerPosition.y){
+         return CGPointMake(velo.x, 20);
+      } else {
+         //basically return the same point. For some reason, it wont work if i return the exact same point
+         return CGPointMake(velo.x - 1, velo.y);
+      }
+   } else if (slope < 0){
+      if (velo.y > playerPosition.y){
+         return CGPointMake(20, velo.y);
+      } else {
+         return CGPointMake(velo.x, 20);
+      }
+   } else if (slope == 0){
+      if (velo.x > playerPosition.x){
+         return CGPointMake(velo.x, 20);
+      } else {
+         return CGPointMake(20, velo.y);
+      }
+   }
+   
+   return CGPointMake(0, 0);
+}
+
+- (UIBezierPath *)returnToStart
+{
+   float slope = [self slope:self.player1.position and:self.player1.lastPosition];
+   CGPoint veloPoint = [self anchor:self.player1.position point:self.player1.lastPosition slope:slope withDistance:80 inside:NO];
+   
+   UIBezierPath *bezPath = [UIBezierPath bezierPath];
+   [bezPath moveToPoint:self.player1.position];
+
+   [bezPath addCurveToPoint:CGPointMake(20, 20) controlPoint1:veloPoint controlPoint2:[self createControlPointUsingVeloPoint: veloPoint playerPosition:self.player1.position slope: slope]];
+   
+   return bezPath;
 }
 
 - (void)update:(NSTimeInterval)currentTime{
@@ -260,54 +302,13 @@
    CGPathMoveToPoint(pathToDraw, NULL, self.player1.position.x, self.player1.position.y);
    float slope = [self slope:self.player1.position and:self.player1.lastPosition];
    
-   CGPoint veloP = [self anchor:self.player1.position point:self.player1.lastPosition slope:slope withDistance:100 inside:NO];
-   
-   if (veloP.x != 0 && veloP.y != 0){
+   if (!isnan(slope)){
+      
+      CGPoint veloP = [self anchor:self.player1.position point:self.player1.lastPosition slope:slope withDistance:100 inside:NO];
       CGPathAddLineToPoint(pathToDraw, NULL, veloP.x, veloP.y);
-      self.veloLine.path = pathToDraw;
+      self.veloVector.path = pathToDraw;
+      self.veloLine.path = [self returnToStart].CGPath;
    }
-}
-- (CGPoint)calculateAnchorPoint2:(CGPoint)currentPosition controlPoint1:(CGPoint)controlPoint1
-{
-   CGPoint returnPoint;
-   float slope = [self slope:currentPosition and:controlPoint1];
-   int dirY = (currentPosition.y > controlPoint1.y) ? 1 : -1;//1 means moving down to top, -1 means top to down
-   int dirX = (currentPosition.x > controlPoint1.x) ? 1 : -1;//1 means moving left to right, -1 means right to left
-   
-   if (slope == slope + 1){
-      if (dirY == 1){
-         return CGPointMake(self.startPoint.x, controlPoint1.y);
-      } else if (dirY == -1){
-         return CGPointMake(controlPoint1.x, self.startPoint.y);
-      }
-      //NSLog(@"SHOULD NEVER BE CALLED");
-   }
-   
-   if (slope > 0){
-      if (dirY == 1){
-         return CGPointMake(controlPoint1.x, self.startPoint.y);//works
-      } else if (dirY == -1){
-         return CGPointMake(self.startPoint.x, controlPoint1.y);
-      }
-      //NSLog(@"SHOULD NEVER BE CALLED");
-   } else if (slope < 0){
-      if (dirY == 1){
-         return CGPointMake(self.startPoint.x, controlPoint1.y);
-      } else if (dirY == -1){
-         return CGPointMake(controlPoint1.x, self.startPoint.y);
-      }
-      //NSLog(@"SHOULD NEVER BE CALLED");
-   } else if (slope == 0){
-      if (dirX == 1){
-         return CGPointMake(controlPoint1.x, self.startPoint.y);
-      } else if (dirY == -1){
-         return CGPointMake(self.startPoint.x, controlPoint1.y);
-      }
-      //NSLog(@"SHOULD NEVER BE CALLED");
-   }
-   
-   //NSLog(@"SHOULD NEVER BE CALLED: %f \t %@ -- %@", slope, NSStringFromCGPoint(currentPosition), NSStringFromCGPoint(controlPoint1));
-   return returnPoint;//this should never be called
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event{
@@ -318,6 +319,11 @@
    
    if ([node.name isEqualToString:@"returnButton"]) {
       NSLog(@"returning");
+      UIBezierPath *returnPath = [self returnToStart];
+      [self.player1 removeAllActions];
+      SKAction *run_route = [SKAction followPath:returnPath.CGPath asOffset:NO orientToPath:NO duration:2.0f];
+      [self.player1 runAction:run_route];
+      self.veloLine.path = returnPath.CGPath;
       
    }else{
       if (![self.player1 hasActions]){
@@ -332,6 +338,7 @@
             [self addChild:self.player1];
             [self addChild:self.returnButton];
             [self addChild:self.veloLine];
+            [self addChild:self.veloVector];
             [self create_path:_point_array];
          }
       }
