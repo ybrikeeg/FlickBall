@@ -19,16 +19,8 @@
       [self addChild:p];
       
       self.lastPosition = self.position;
-      
-      [NSTimer scheduledTimerWithTimeInterval:1.0/15.0f target:self selector:@selector(update:) userInfo:nil repeats:YES];
    }
    return self;
-}
-
--(void)update:(CFTimeInterval)currentTime {
-   if (self.position.x != self.lastPosition.x && self.position.y != self.lastPosition.y){
-      self.lastPosition = self.position;
-   }
 }
 
 @end

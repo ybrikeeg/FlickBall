@@ -298,19 +298,28 @@
 }
 
 - (void)update:(NSTimeInterval)currentTime{
+   /*
    CGMutablePathRef pathToDraw = CGPathCreateMutable();
    CGPathMoveToPoint(pathToDraw, NULL, self.player1.position.x, self.player1.position.y);
    float slope = [self slope:self.player1.position and:self.player1.lastPosition];
    
    if (!isnan(slope)){
-      
       CGPoint veloP = [self anchor:self.player1.position point:self.player1.lastPosition slope:slope withDistance:100 inside:NO];
       CGPathAddLineToPoint(pathToDraw, NULL, veloP.x, veloP.y);
       self.veloVector.path = pathToDraw;
       self.veloLine.path = [self returnToStart].CGPath;
    }
+    */
 }
 
+- (void)returnPlayerToStart{
+   NSLog(@"returning - %@ \t %@", NSStringFromCGPoint(self.player1.position), NSStringFromCGPoint(self.player1.lastPosition));
+   UIBezierPath *returnPath = [self returnToStart];
+   [self.player1 removeAllActions];
+   SKAction *run_route = [SKAction followPath:returnPath.CGPath asOffset:NO orientToPath:NO duration:2.0f];
+   [self.player1 runAction:run_route];
+   self.veloLine.path = returnPath.CGPath;
+}
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event{
    
    UITouch *touch = [touches anyObject];
@@ -318,13 +327,8 @@
    SKNode *node = [self nodeAtPoint:location];
    
    if ([node.name isEqualToString:@"returnButton"]) {
-      NSLog(@"returning");
-      UIBezierPath *returnPath = [self returnToStart];
-      [self.player1 removeAllActions];
-      SKAction *run_route = [SKAction followPath:returnPath.CGPath asOffset:NO orientToPath:NO duration:2.0f];
-      [self.player1 runAction:run_route];
-      self.veloLine.path = returnPath.CGPath;
-      
+      self.player1.lastPosition = self.player1.position;
+      [self performSelector:@selector(returnPlayerToStart) withObject:nil afterDelay:0.05f];
    }else{
       if (![self.player1 hasActions]){
          [self removeAllChildren];
