@@ -34,14 +34,15 @@
        [self addChild:_player];
        */
       
-      _player1 = [[Player alloc] initWithImageNamed:@"player"];
-      _player1.position = [[_point_array objectAtIndex:0] CGPointValue];
-      _player1.zPosition = 1.0;
-      [self addChild:_player1];
+      self.player1 = [[Player alloc] initWithImageNamed:@"player"];
+      self.player1.position = [[_point_array objectAtIndex:0] CGPointValue];
+      self.player1.zPosition = 1.0;
+      [self addChild:self.player1];
       
       
       self.veloLine = [SKShapeNode node];
       [self.veloLine setStrokeColor:[UIColor redColor]];
+      self.veloLine.zPosition = 50.0f;
       [self addChild:self.veloLine];
       
       
@@ -56,7 +57,7 @@
       
       
       _startPoint = CGPointMake(20, 20);
-      [NSTimer scheduledTimerWithTimeInterval:1.0/35.0f target:self selector:@selector(update:) userInfo:nil repeats:YES];
+      [NSTimer scheduledTimerWithTimeInterval:1.0/60.0f target:self selector:@selector(update:) userInfo:nil repeats:YES];
       
       
    }
@@ -84,21 +85,25 @@
  * extrapolation of it
  */
 -(CGPoint)anchor:(CGPoint)anchor point:(CGPoint)other slope:(float)slope withDistance:(int)dist inside:(BOOL) inside{
+   if (anchor.x == other.x && anchor.y == other.y){
+      return CGPointMake(0, 0);
+   }
    float dx = 0, dy = 0;
+   
    if (slope == 0) {
       dx = dist;
-   }else if (slope == slope + 1){//slope is infinite (vertical line)
+   }else if (slope == slope + 1 || slope != slope){//slope is infinite (vertical line)
       dy = dist;
    }else{
       dx = sqrtf((powf(dist, 2) / (1 + (powf(slope, 2)))));
       dy = fabs(slope) * fabs(dx);
    }
    
-   int x_dir = -1, y_dir = -1;
-   if (anchor.x < other.x) x_dir = 1;
-   if (anchor.y < other.y) y_dir = 1;
    
-   int inside_adjust = (inside)? 1 : -1;
+   float x_dir = -1.0, y_dir = -1.0;
+   if (anchor.x <= other.x) x_dir = 1.0;
+   if (anchor.y <= other.y) y_dir = 1.0;
+   float inside_adjust = (inside)? 1.0 : -1.0;
    
    CGPoint tangent_point;
    tangent_point.x = anchor.x + (x_dir * dx * inside_adjust);
@@ -245,15 +250,22 @@
    
    [self addChild:line_to_t1];
    
-   //NSLog(@"%@", _point_array);
    
    SKAction *run_route = [SKAction followPath:player_path asOffset:NO orientToPath:NO duration:6.0f];
-   [_player1 runAction:run_route];
-   
+   [self.player1 runAction:run_route];
 }
+
 - (void)update:(NSTimeInterval)currentTime{
-   self.veloLine.path = [self returnToStart].CGPath;
+   CGMutablePathRef pathToDraw = CGPathCreateMutable();
+   CGPathMoveToPoint(pathToDraw, NULL, self.player1.position.x, self.player1.position.y);
+   float slope = [self slope:self.player1.position and:self.player1.lastPosition];
    
+   CGPoint veloP = [self anchor:self.player1.position point:self.player1.lastPosition slope:slope withDistance:100 inside:NO];
+   
+   if (veloP.x != 0 && veloP.y != 0){
+      CGPathAddLineToPoint(pathToDraw, NULL, veloP.x, veloP.y);
+      self.veloLine.path = pathToDraw;
+   }
 }
 - (CGPoint)calculateAnchorPoint2:(CGPoint)currentPosition controlPoint1:(CGPoint)controlPoint1
 {
@@ -268,7 +280,7 @@
       } else if (dirY == -1){
          return CGPointMake(controlPoint1.x, self.startPoint.y);
       }
-      NSLog(@"SHOULD NEVER BE CALLED");
+      //NSLog(@"SHOULD NEVER BE CALLED");
    }
    
    if (slope > 0){
@@ -277,51 +289,36 @@
       } else if (dirY == -1){
          return CGPointMake(self.startPoint.x, controlPoint1.y);
       }
-      NSLog(@"SHOULD NEVER BE CALLED");
+      //NSLog(@"SHOULD NEVER BE CALLED");
    } else if (slope < 0){
       if (dirY == 1){
          return CGPointMake(self.startPoint.x, controlPoint1.y);
       } else if (dirY == -1){
          return CGPointMake(controlPoint1.x, self.startPoint.y);
       }
-      NSLog(@"SHOULD NEVER BE CALLED");
+      //NSLog(@"SHOULD NEVER BE CALLED");
    } else if (slope == 0){
       if (dirX == 1){
          return CGPointMake(controlPoint1.x, self.startPoint.y);
       } else if (dirY == -1){
          return CGPointMake(self.startPoint.x, controlPoint1.y);
       }
-      NSLog(@"SHOULD NEVER BE CALLED");
+      //NSLog(@"SHOULD NEVER BE CALLED");
    }
    
-   NSLog(@"SHOULD NEVER BE CALLED: %f \t %@ -- %@", slope, NSStringFromCGPoint(currentPosition), NSStringFromCGPoint(controlPoint1));
+   //NSLog(@"SHOULD NEVER BE CALLED: %f \t %@ -- %@", slope, NSStringFromCGPoint(currentPosition), NSStringFromCGPoint(controlPoint1));
    return returnPoint;//this should never be called
 }
-- (UIBezierPath *)returnToStart
-{
-   float slope = [self slope:self.player1.position and:self.player1.lastPosition];
-   CGPoint veloPoint = [self anchor:self.player1.position point:self.player1.lastPosition slope:slope withDistance:140 inside:NO];
 
-   UIBezierPath *bezPath = [UIBezierPath bezierPath];
-   [bezPath moveToPoint:self.player1.position];
-   //[bezPath addQuadCurveToPoint:CGPointMake(20, 20) controlPoint:veloPoint];
-   CGPoint p2 = [self calculateAnchorPoint2: self.player1.position controlPoint1: veloPoint];
-   [bezPath addCurveToPoint:CGPointMake(20, 20) controlPoint1:veloPoint controlPoint2:p2];
-   //NSLog(@"Control Point: %@", NSStringFromCGPoint(veloPoint));
-   self.veloLine.path = bezPath.CGPath;
-   return bezPath;
-}
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event{
+   
    UITouch *touch = [touches anyObject];
    CGPoint location = [touch locationInNode:self];
    SKNode *node = [self nodeAtPoint:location];
    
    if ([node.name isEqualToString:@"returnButton"]) {
       NSLog(@"returning");
-      UIBezierPath *returnPath = [self returnToStart];
-      [self.player1 removeAllActions];
-      SKAction *run_route = [SKAction followPath:returnPath.CGPath asOffset:NO orientToPath:NO duration:2.0f];
-      [self.player1 runAction:run_route];
+      
    }else{
       if (![self.player1 hasActions]){
          [self removeAllChildren];
@@ -331,8 +328,8 @@
          [_point_array addObject:[NSValue valueWithCGPoint:touchPoint]];
          
          if ([_point_array count] >= 3){
-            _player1.position = [[_point_array objectAtIndex:0] CGPointValue];
-            [self addChild:_player1];
+            self.player1.position = [[_point_array objectAtIndex:0] CGPointValue];
+            [self addChild:self.player1];
             [self addChild:self.returnButton];
             [self addChild:self.veloLine];
             [self create_path:_point_array];

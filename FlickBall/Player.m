@@ -9,29 +9,26 @@
 #import "Player.h"
 
 @interface Player ()
-@property(nonatomic, retain) SKShapeNode *veloLine;
 @end
 @implementation Player
 
 - (instancetype) initWithImageNamed:(NSString *)fileName {
    // note that [super init] will call the SpaceshipNode's init method
    if (self = [super init]) {
-      NSLog(@"New player: %@", fileName);
       SKSpriteNode *p = [SKSpriteNode spriteNodeWithImageNamed:fileName];
       [self addChild:p];
       
       self.lastPosition = self.position;
       
-      self.veloLine = [SKShapeNode node];
-      [self addChild:self.veloLine];
-      
-      [NSTimer scheduledTimerWithTimeInterval:1.0/35.0f target:self selector:@selector(update:) userInfo:nil repeats:YES];
+      [NSTimer scheduledTimerWithTimeInterval:1.0/30.0f target:self selector:@selector(update:) userInfo:nil repeats:YES];
    }
    return self;
 }
 
 -(void)update:(CFTimeInterval)currentTime {
-   self.lastPosition = self.position;
+   if (self.position.x != self.lastPosition.x && self.position.y != self.lastPosition.y){
+      self.lastPosition = self.position;
+   }
 }
 
 @end
