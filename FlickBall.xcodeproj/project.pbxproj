@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		428988BC196D177F00758BCF /* Player.m in Sources */ = {isa = PBXBuildFile; fileRef = 428988BB196D177F00758BCF /* Player.m */; };
+		42B0284819860F7000B5423A /* GameLogic.m in Sources */ = {isa = PBXBuildFile; fileRef = 42B0284719860F7000B5423A /* GameLogic.m */; };
 		42BFAB4D195F7C2E001BB4CA /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 42BFAB4C195F7C2E001BB4CA /* Foundation.framework */; };
 		42BFAB4F195F7C2E001BB4CA /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 42BFAB4E195F7C2E001BB4CA /* CoreGraphics.framework */; };
 		42BFAB51195F7C2E001BB4CA /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 42BFAB50195F7C2E001BB4CA /* UIKit.framework */; };
@@ -17,7 +18,7 @@
 		42BFAB5F195F7C2E001BB4CA /* AttributorAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 42BFAB5E195F7C2E001BB4CA /* AttributorAppDelegate.m */; };
 		42BFAB62195F7C2E001BB4CA /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 42BFAB60195F7C2E001BB4CA /* Main.storyboard */; };
 		42BFAB65195F7C2E001BB4CA /* AttributorViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 42BFAB64195F7C2E001BB4CA /* AttributorViewController.m */; };
-		42BFAB68195F7C2E001BB4CA /* AttributorMyScene.m in Sources */ = {isa = PBXBuildFile; fileRef = 42BFAB67195F7C2E001BB4CA /* AttributorMyScene.m */; };
+		42BFAB68195F7C2E001BB4CA /* GameScene.m in Sources */ = {isa = PBXBuildFile; fileRef = 42BFAB67195F7C2E001BB4CA /* GameScene.m */; };
 		42BFAB6C195F7C2E001BB4CA /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 42BFAB6B195F7C2E001BB4CA /* Images.xcassets */; };
 		42BFAB73195F7C2E001BB4CA /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 42BFAB72195F7C2E001BB4CA /* XCTest.framework */; };
 		42BFAB74195F7C2E001BB4CA /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 42BFAB4C195F7C2E001BB4CA /* Foundation.framework */; };
@@ -39,6 +40,8 @@
 /* Begin PBXFileReference section */
 		428988BA196D177F00758BCF /* Player.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Player.h; sourceTree = "<group>"; };
 		428988BB196D177F00758BCF /* Player.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Player.m; sourceTree = "<group>"; };
+		42B0284619860F7000B5423A /* GameLogic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GameLogic.h; sourceTree = "<group>"; };
+		42B0284719860F7000B5423A /* GameLogic.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GameLogic.m; sourceTree = "<group>"; };
 		42BFAB49195F7C2E001BB4CA /* FlickBall.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FlickBall.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		42BFAB4C195F7C2E001BB4CA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		42BFAB4E195F7C2E001BB4CA /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -53,8 +56,8 @@
 		42BFAB61195F7C2E001BB4CA /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		42BFAB63195F7C2E001BB4CA /* AttributorViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AttributorViewController.h; sourceTree = "<group>"; };
 		42BFAB64195F7C2E001BB4CA /* AttributorViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AttributorViewController.m; sourceTree = "<group>"; };
-		42BFAB66195F7C2E001BB4CA /* AttributorMyScene.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AttributorMyScene.h; sourceTree = "<group>"; };
-		42BFAB67195F7C2E001BB4CA /* AttributorMyScene.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AttributorMyScene.m; sourceTree = "<group>"; };
+		42BFAB66195F7C2E001BB4CA /* GameScene.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GameScene.h; sourceTree = "<group>"; };
+		42BFAB67195F7C2E001BB4CA /* GameScene.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GameScene.m; sourceTree = "<group>"; };
 		42BFAB6B195F7C2E001BB4CA /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		42BFAB71195F7C2E001BB4CA /* FlickBallTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FlickBallTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		42BFAB72195F7C2E001BB4CA /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
@@ -127,10 +130,12 @@
 				42BFAB60195F7C2E001BB4CA /* Main.storyboard */,
 				42BFAB63195F7C2E001BB4CA /* AttributorViewController.h */,
 				42BFAB64195F7C2E001BB4CA /* AttributorViewController.m */,
-				42BFAB66195F7C2E001BB4CA /* AttributorMyScene.h */,
-				42BFAB67195F7C2E001BB4CA /* AttributorMyScene.m */,
+				42BFAB66195F7C2E001BB4CA /* GameScene.h */,
+				42BFAB67195F7C2E001BB4CA /* GameScene.m */,
 				428988BA196D177F00758BCF /* Player.h */,
 				428988BB196D177F00758BCF /* Player.m */,
+				42B0284619860F7000B5423A /* GameLogic.h */,
+				42B0284719860F7000B5423A /* GameLogic.m */,
 				42BFAB6B195F7C2E001BB4CA /* Images.xcassets */,
 				42BFAB55195F7C2E001BB4CA /* Supporting Files */,
 			);
@@ -266,8 +271,9 @@
 			files = (
 				42BFAB5F195F7C2E001BB4CA /* AttributorAppDelegate.m in Sources */,
 				42BFAB65195F7C2E001BB4CA /* AttributorViewController.m in Sources */,
-				42BFAB68195F7C2E001BB4CA /* AttributorMyScene.m in Sources */,
+				42BFAB68195F7C2E001BB4CA /* GameScene.m in Sources */,
 				42BFAB5B195F7C2E001BB4CA /* main.m in Sources */,
+				42B0284819860F7000B5423A /* GameLogic.m in Sources */,
 				428988BC196D177F00758BCF /* Player.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

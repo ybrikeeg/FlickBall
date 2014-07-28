@@ -9,7 +9,7 @@
 #import <SpriteKit/SpriteKit.h>
 #import "Player.h"
 
-@interface AttributorMyScene : SKScene
+@interface GameScene : SKScene
 
 @property (nonatomic,retain) NSMutableArray *point_array; // ADDED ON EDI
 @property (nonatomic, retain) Player *player1;

@@ -12,5 +12,9 @@
 
 @property (nonatomic) CGPoint lastPosition;
 @property (nonatomic) CGPoint startPosition;
+@property (nonatomic, strong)NSMutableArray *pointArray;
 
+
+- (void)hike;
+- (void)playIsOver;
 @end
